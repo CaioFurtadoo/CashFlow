@@ -2,6 +2,6 @@
 {
     public interface IExpenseDeleteOnlyRepository
     {
-        Task<bool> DeleteId(long id);
+        Task<bool> DeleteId(Entities.User user, long id);
     }
 }

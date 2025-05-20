@@ -2,6 +2,7 @@
 using CashFlow.Domain.Enums;
 using CashFlow.Domain.Reports;
 using CashFlow.Domain.Repositories.Expenses;
+using CashFlow.Domain.Services.LoggedUser;
 using ClosedXML.Excel;
 
 namespace CashFlow.Application.UseCases.Expenses.Reports.Excel
@@ -9,14 +10,17 @@ namespace CashFlow.Application.UseCases.Expenses.Reports.Excel
     public class GenerateExpenseReportsExcelUseCase : IGenerateExpenseReportsExcelUseCase
     {
         private readonly IExpenseReadOnlyRepository _repository;
-        public GenerateExpenseReportsExcelUseCase(IExpenseReadOnlyRepository repository)
+        private readonly ILoggedUser _loggedUser;
+        public GenerateExpenseReportsExcelUseCase(IExpenseReadOnlyRepository repository, ILoggedUser logged)
         {
             _repository = repository;
+            _loggedUser = logged;
         }
 
         public async Task<byte[]> Execute(DateOnly month)
         {
-            var expenses = await _repository.FilterByMonth(month);
+            var loggedUser = await _loggedUser.Get();
+            var expenses = await _repository.FilterByMonth(loggedUser, month);
 
             if(expenses.Count == 0)
             {

@@ -2,22 +2,26 @@
 using CashFlow.Exception;
 using CashFlow.Domain.Repositories;
 using CashFlow.Domain.Repositories.Expenses;
+using CashFlow.Domain.Services.LoggedUser;
 
 namespace CashFlow.Application.UseCases.Expenses.DeleteId
 {
     public class DeleteIdExpenseUseCase : IDeleteExpenseUseCase
     {
-        public readonly IExpenseDeleteOnlyRepository _repository;
-        public readonly IUnitOfWork _unitOfWork;
-        public  DeleteIdExpenseUseCase(IExpenseDeleteOnlyRepository repository, IUnitOfWork unitOfWork)
+        private readonly IExpenseDeleteOnlyRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILoggedUser _loggedUser;
+        public  DeleteIdExpenseUseCase(IExpenseDeleteOnlyRepository repository, IUnitOfWork unitOfWork, ILoggedUser logged)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _loggedUser = logged;
         }
 
         public async Task Execute(long id)
         {
-            var result = await _repository.DeleteId(id);
+            var loggedUser = await _loggedUser.Get();
+            var result = await _repository.DeleteId(loggedUser, id);
 
             if (result == false)
             {

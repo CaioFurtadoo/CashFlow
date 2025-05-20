@@ -18,23 +18,23 @@ namespace CashFlow.Infrastructure.DataAccess.Repositories
             await _dbcontext.AddAsync(expense);
         }
 
-        public async Task<List<Expense>> GetAll()
+        public async Task<List<Expense>> GetAll(User user)
         {
-            return await _dbcontext.Expenses.AsNoTracking().ToListAsync();
+            return await _dbcontext.Expenses.AsNoTracking().Where(e => e.UserId == user.Id).ToListAsync();
         }
 
-        async Task<Expense?> IExpenseReadOnlyRepository.GetId(long id)
+        async Task<Expense?> IExpenseReadOnlyRepository.GetId(User user,long id)
         {
-            return await _dbcontext.Expenses.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+            return await _dbcontext.Expenses.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
         }
-        async Task<Expense?> IExpenseUpdateOnlyRepository.GetId(long id)
+        async Task<Expense?> IExpenseUpdateOnlyRepository.GetId(User user, long id)
         {
-            return await _dbcontext.Expenses.FirstOrDefaultAsync(e => e.Id == id);
+            return await _dbcontext.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
         }
 
-        public async Task<bool> DeleteId(long id)
+        public async Task<bool> DeleteId(User user, long id)
         {
-            var result =  await _dbcontext.Expenses.FirstOrDefaultAsync(e => e.Id == id);
+            var result =  await _dbcontext.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
             if(result is null)
             {
                 return false;
@@ -48,7 +48,7 @@ namespace CashFlow.Infrastructure.DataAccess.Repositories
             _dbcontext.Expenses.Update(expense);
         }
 
-        public async Task<List<Expense>> FilterByMonth(DateOnly date)
+        public async Task<List<Expense>> FilterByMonth(User user, DateOnly date)
         {
             var startDate = new DateTime(year: date.Year, month: date.Month, day: 1).Date;
 
@@ -57,7 +57,7 @@ namespace CashFlow.Infrastructure.DataAccess.Repositories
 
             return await _dbcontext.Expenses
                 .AsNoTracking()
-                .Where(expense => expense.Date >= startDate && expense.Date <= endDate)
+                .Where(expense => expense.Date >= startDate && expense.Date <= endDate && expense.UserId == user.Id)
                 .OrderBy(expense => expense.Date)
                 .ThenBy(expense => expense.Title)
                 .ToListAsync();

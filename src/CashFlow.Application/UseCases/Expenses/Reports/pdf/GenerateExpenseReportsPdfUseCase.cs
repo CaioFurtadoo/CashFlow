@@ -1,4 +1,5 @@
 ﻿using CashFlow.Domain.Repositories.Expenses;
+using CashFlow.Domain.Services.LoggedUser;
 
 namespace CashFlow.Application.UseCases.Expenses.Reports.pdf
 {
@@ -6,15 +7,18 @@ namespace CashFlow.Application.UseCases.Expenses.Reports.pdf
     {
         private const string CURRENCY_SYMBOL = "$";
         private readonly IExpenseReadOnlyRepository _repository;
+        private readonly ILoggedUser _loggedUser;
 
-        public GenerateExpenseReportsPdfUseCase(IExpenseReadOnlyRepository repository)
+        public GenerateExpenseReportsPdfUseCase(IExpenseReadOnlyRepository repository, ILoggedUser logged)
         {
             _repository = repository;
+            _loggedUser = logged;
         }
 
         public async Task<byte[]> Execute(DateOnly month)
         {
-            var expenses = await _repository.FilterByMonth(month);
+            var loggedUser = await _loggedUser.Get();
+            var expenses = await _repository.FilterByMonth(loggedUser, month);
             if(expenses.Count == 0)
             {
                 return [];

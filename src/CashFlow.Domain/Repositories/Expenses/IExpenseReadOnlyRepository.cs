@@ -4,8 +4,8 @@ namespace CashFlow.Domain.Repositories.Expenses
 {
     public interface IExpenseReadOnlyRepository
     {
-        Task<List<Expense>> GetAll();
-        Task<Expense?> GetId(long id);
-        Task<List<Expense>> FilterByMonth(DateOnly date); 
+        Task<List<Expense>> GetAll(Entities.User user);
+        Task<Expense?> GetId(Entities.User user, long id);
+        Task<List<Expense>> FilterByMonth(Entities.User user, DateOnly date); 
     }
 }
